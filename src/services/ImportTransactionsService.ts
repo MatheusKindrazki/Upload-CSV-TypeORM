@@ -14,17 +14,16 @@ interface CSVTransaction {
 
 class ImportTransactionsService {
   async execute(filePath: string): Promise<Transaction[]> {
-    const contactReadStream = fs.createReadStream(filePath);
+    const contactsReadStream = fs.createReadStream(filePath);
 
     const categoriesRepository = getRepository(Category);
     const transactionsRepository = getRepository(Transaction);
 
     const parsers = csvParse({
-      delimiter: ',',
       from_line: 2,
     });
 
-    const parseCSV = contactReadStream.pipe(parsers);
+    const parseCSV = contactsReadStream.pipe(parsers);
 
     const transactions: CSVTransaction[] = [];
     const categories: string[] = [];
@@ -66,8 +65,6 @@ class ImportTransactionsService {
     await categoriesRepository.save(newCategories);
 
     const finalCategories = [...newCategories, ...existingCategories];
-
-    // return transactions;
 
     const createdTransactions = transactionsRepository.create(
       transactions.map(transaction => ({
